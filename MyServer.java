@@ -1,16 +1,55 @@
 import java.net.*;
+import java.util.Enumeration;
+import java.util.Scanner;
 import java.awt.Desktop;
 import java.io.*;
 
 class MyServer {
-	public static void main(String args[]) {
+	static Scanner sc = new Scanner(System.in);
+
+	public static void main(String args[]) throws Exception {
+		
+		
+		test();
+		System.out.println("Enter the wlp ip in your android phone\n\n");
+		System.out.println("Enter port number");
+		int port = sc.nextInt();
+		createServer(port);
+	}
+
+	 static void test() throws Exception {
+	        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+	        while (interfaces.hasMoreElements()) {
+	            NetworkInterface networkInterface = interfaces.nextElement();
+	            // drop inactive
+	            if (!networkInterface.isUp())
+	                continue;
+
+	            // smth we can explore
+	            Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+	            while(addresses.hasMoreElements()) {
+	                InetAddress addr = addresses.nextElement();
+	                System.out.println(String.format("NetInterface: name [%s], ip [%s]",
+	                        networkInterface.getDisplayName(), addr.getHostAddress()));
+	            }
+	        }
+	    }
+	
+	
+	static void createServer(int port) {
+		ServerSocket ss = null;
+		Socket s = null;
+		BufferedReader in = null;
+		PrintWriter out = null;
 		try {
-			ServerSocket ss = new ServerSocket(3333);
-			Socket s = ss.accept();
+			ss = new ServerSocket(port);
+			System.out.println("Server started at port - "+port);
+			s = ss.accept();
+			System.out.println("Cennected - :-)");
+			in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
-			PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())), false);
+			out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream())), false);
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -45,9 +84,20 @@ class MyServer {
 			out.close();
 			s.close();
 			ss.close();
-		}
-		catch(Exception e) {
-			main(null);
+		} catch (BindException e) {
+			System.out.println("port already in use, please re-enter:");
+			createServer(sc.nextInt());
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				in.close();
+				out.close();
+				s.close();
+				ss.close();
+			} catch (Exception ee) {
+				// TODO: handle exception
+			}
+			createServer(port);
 		}
 	}
 }
