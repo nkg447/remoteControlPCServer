@@ -1,4 +1,3 @@
-
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
@@ -122,7 +121,6 @@ public class ServerFrame extends JFrame implements ActionListener {
 			@Override
 			public void run() {
 				createServer();
-				run();
 
 			}
 		}).start();
@@ -214,6 +212,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 		} catch (BindException e) {
 			status.setForeground(new Color(128, 0, 0));
 			status.setText("Status -PORT already in use");
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
@@ -225,6 +224,7 @@ public class ServerFrame extends JFrame implements ActionListener {
 				// TODO: handle exception
 			}
 		}
+		createServer();
 	}
 
 }
